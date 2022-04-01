@@ -1,0 +1,248 @@
+---
+title: "확률분포"
+author: "Hong"
+date: '2022 3 28 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. 특수 비연속 변수
+
+## 1.1 베르누이 분포(Bernoulli Distribution)
+```{r}
+# install.packages("LearningStats")
+library(LearningStats)
+
+# PDF & CDF
+plotBinom(1,0.5,type = "b",col="green")
+
+dbinom(1,1,0.5)
+
+x=sample(c(0,1),size=6, replace=T)
+mean(x)
+sd(x)
+```
+
+## 1.2 이항분포(Binormial Distribution)
+
+```{r}
+library(LearningStats)
+
+# PDF & CDF
+plotBinom(10,0.2,type="b",col="green")
+
+# Random sample
+x=seq(1:10)
+y=dbinom(x,size=10,prob = 0.5)
+plot(x,y,type='h',lwd=3)
+
+# P(X=5)?
+dbinom(5,size = 10,prob = 0.5) 
+
+# P(X<=6)
+pbinom(6,size = 10,prob=0.5)
+
+# P(X>=7)
+1-pbinom(6,size = 10,prob = 0.5)
+
+
+```
+
+# 2. 특수 연속 변수
+
+## 2.1 균등분포(Uniform Distribution)
+
+```{r}
+library(LearningStats)
+
+# PDF & CDF
+plotUnif(3,8, type="den")
+plotUnif(3,8, type="dis")
+
+# p값
+x<-4:9
+dunif(x,min=3,max=8)
+
+# P(x<=5)
+punif(5,min=3,max=8)
+
+# P(X<=0.9)?
+qunif(0.9,min=3,max=8)
+```
+
+## 2.2 정규분포(Normal Distribution)
+
+```{r}
+# PDF & CDF
+plotNorm(mu=6,sigma=2, type="den",col = "green")
+plotNorm(0,1, type="den",col = "red")
+
+plotNorm(6,2, type="dis",col="green")
+plotNorm(0,1, type="dis",col = "red")
+
+x<-seq(0,10,0.1)
+plot(x,dnorm(x,mean=5, sd=1),type="line")
+
+# P(X=6)
+dnorm(6,mean=5, sd=1)
+
+# P(X<=6)
+pnorm(6,5,1)
+
+# P(X<=0.25)의 X값
+qnorm(.25,mean = 5,sd=1)
+
+```
+
+
+## 2.3 Chi-square Distribution
+
+```{r}
+library(LearningStats)
+# PDF & CDF
+plotChi(df=5,type = "den",col = "blue")
+plotChi(df=5,type = "dis",col = "green")
+
+plotChi(df=15,type = "den",col = "red")
+plotChi(df=15,type = "dis",col = "green")
+
+# P(X=40)값 구하기
+x=40
+dchisq(x,df=30)
+
+# P(X<=40) 누적확률값
+pchisq(x,df=30)
+
+# P(X<=.95), 즉누적확률=0.95인 X값
+qchisq(.95,df=10)
+
+# n개의 임의추출
+n=10
+rchisq(n,30)
+```
+
+## 2.4 Student's t 분포
+
+```{r}
+#library(LearningStats)
+plotTS(df=10, type = "den",col = "green")
+plotTS(df=10, type = "dis",col = "red")
+plotTS(df=100, type = "den",col = "green")
+plotTS(df=100, type = "dis",col = "red")
+```
+
+
+## 2.5 F 분포
+```{r}
+#library(LearningStats)
+
+plotFS(df1=5, df2=10, type = "den",col = "green")
+plotFS(df1=5, df2=10, type = "dis",col = "red")
+plotFS(df1=50, df=100, type = "den",col = "green")
+plotFS(df1=50, df=100, type = "dis",col = "red")
+```
+
+##2.6 ggplot으로 그리기(참조)
+```{r}
+ library(ggplot2)
+
+ggplot(data.frame(x=c(0,10)), aes(x=x)) +
+   stat_function(fun=dchisq, args=list(df=2), colour="black", size=1.2) +
+   geom_text(x=0.6, y=1, label="df=2") +
+    
+   stat_function(fun=dchisq, args=list(df=5), colour="blue", size=1.2) +
+   geom_text(x=0, y=0.55, label="df=5") +
+  
+   stat_function(fun=dchisq, args=list(df=10), colour="red", size=1.2) +
+   geom_text(x=0.5, y=0.05, label="df=10") +
+      
+   ggtitle("Chisq-Distribution")
+```
+
+# 3. 평균과 분산
+```{r}
+a=c(2,2,2,2,2)
+b=3
+x<-c(2,3,4,5,6)
+y<-c(5,7,7,9,12)
+#1
+mean(a);mean(x);mean(y)
+var(a);var(x);var(y)
+
+#2
+mean(a*x+b)
+a*mean(x)+b
+
+#3
+z=x+y
+mean(z)
+mean(x)+mean(y)
+
+#4
+var(a+b*x)
+b**2*var(x)
+
+#5
+var(z)
+var(x)+var(y)+2*cov(x,y)
+```
+
+# 3. Central Limit Theorem
+
+```{r}
+# 버스를 기디리는 시간
+set.seed(0)
+#df<-runif(n=1000,min=2, max=6)
+#hist(df, col="green",main="Histogram of Waiting Times")
+
+df<-rbinom (n=1000,size=1,p=0.5) 
+hist(df, col="green",main="Histogram of Tossing coins")
+
+s_df<-c()
+n=1000
+for (i in 1:n){
+   s_df[i]=mean(sample(df,5,replace=TRUE)) # size=5
+}
+
+mean(s_df)
+sd(s_df)
+hist(s_df,col="green", xlab="Waiting Time", main="표본크기=5")
+
+
+s_df<-c()
+n=1000
+for (i in 1:n){
+   s_df[i]=mean(sample(df,30,replace=TRUE)) # size=30
+}
+
+mean(s_df)
+sd(s_df)
+hist(s_df,col="green", xlab="Waiting Time", main="표본크기=30")
+
+
+s_df<-c()
+n=1000
+for (i in 1:n){
+   s_df[i]=mean(sample(df,100,replace=TRUE)) # size=100
+}
+
+mean(s_df)
+sd(s_df)
+hist(s_df,col="green", xlab="Waiting Time", main="표본크기=100")
+
+s_df<-c()
+n=1000
+for (i in 1:n){
+   s_df[i]=mean(sample(df,1000,replace=TRUE)) # size=1000
+}
+
+mean(s_df)
+sd(s_df)
+hist(s_df,col="green", xlab="Waiting Time", main="표본크기=1000")
+
+```
+
+
